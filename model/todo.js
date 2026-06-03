@@ -1,31 +1,29 @@
 // model/todo.js
 const { Pool } = require('pg');
 
-// Connection pool
+// Folosește DATABASE_URL în loc de variabile separate
 const pool = new Pool({
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  database: process.env.DB_DATABASE,
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false } // Necesar pentru Render
 });
 
-// Creazi tabela "todo" dacă nu există deja
+// Inițializează tabela (important!)
 const initDB = async () => {
-  const query = `
-    CREATE TABLE IF NOT EXISTS todo (
-      todo_id SERIAL PRIMARY KEY,
-      description VARCHAR(225) NOT NULL
-    );
-  `;
-  await pool.query(query);
-  console.log('✅ Table "todo" is ready');
+  try {
+    const query = `
+      CREATE TABLE IF NOT EXISTS todo (
+        todo_id SERIAL PRIMARY KEY,
+        description VARCHAR(225) NOT NULL
+      );
+    `;
+    await pool.query(query);
+    console.log('✅ Table "todo" is ready');
+  } catch (error) {
+    console.error('Error creating table:', error);
+  }
 };
 
-// Apelează funcția la pornire
-initDB().catch(console.error);
-
-// INSERT function - adauga o noua sarcina in baza de date
+// Creează o nouă sarcină
 const create = async (description) => {
   try {
     const result = await pool.query(
@@ -39,10 +37,10 @@ const create = async (description) => {
   }
 };
 
-// GET function - preia toate sarcinile din baza de date
+// Obține toate sarcinile
 const get = async () => {
   try {
-    const result = await pool.query('SELECT * FROM todo');
+    const result = await pool.query('SELECT * FROM todo ORDER BY todo_id ASC');
     return result.rows;
   } catch (error) {
     console.error('Eroare la get:', error);
@@ -50,7 +48,7 @@ const get = async () => {
   }
 };
 
-// DELETE function - sterge o sarcina dupa ID
+// Șterge o sarcină după ID
 const remove = async (id) => {
   try {
     const result = await pool.query(
@@ -64,7 +62,10 @@ const remove = async (id) => {
   }
 };
 
-// EXPORT - exporta functiile pentru a fi folosite in alte parti ale aplicatiei
+// Rulează inițializarea bazei de date
+initDB();
+
+// EXPORT
 module.exports = {
   create,
   get,
