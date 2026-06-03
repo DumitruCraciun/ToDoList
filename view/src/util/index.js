@@ -1,7 +1,7 @@
 // view/src/util/index.js
 
-// API base URL - backend-ul rulează pe portul 8000
-const API_URL = 'http://localhost:8000/api';
+// URL-ul live de pe Render
+const API_URL = 'https://todolist-pu3r.onrender.com/api';
 
 // POST - creează un nou todo (acum trimite JSON, nu FormData)
 export const createTodo = async (todo) => {

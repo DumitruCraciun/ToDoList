@@ -10,6 +10,21 @@ const pool = new Pool({
   database: process.env.DB_DATABASE,
 });
 
+// Creazi tabela "todo" dacă nu există deja
+const initDB = async () => {
+  const query = `
+    CREATE TABLE IF NOT EXISTS todo (
+      todo_id SERIAL PRIMARY KEY,
+      description VARCHAR(225) NOT NULL
+    );
+  `;
+  await pool.query(query);
+  console.log('✅ Table "todo" is ready');
+};
+
+// Apelează funcția la pornire
+initDB().catch(console.error);
+
 // INSERT function - adauga o noua sarcina in baza de date
 const create = async (description) => {
   try {

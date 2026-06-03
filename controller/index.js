@@ -1,19 +1,37 @@
 // controller/index.js
 const { create, get, remove } = require('../model/todo');
 
+// Lista cuvintelor interzise
+const forbiddenWords = [
+  'sex', 'fuck', 'shit', 'porn', 'nude', 'violence',
+  'kill', 'bomb', 'terror', 'attack', 'die', 'death',
+  'nigger', 'faggot', 'retard', 'whore', 'cunt', 'bitch'
+];
+
+// Verifică dacă textul conține cuvinte interzise
+const containsForbiddenWords = (text) => {
+  const lowerText = text.toLowerCase();
+  return forbiddenWords.some(word => lowerText.includes(word));
+};
+
 // CREATE - pentru a adauga un nou todo
 const createTodo = async (req, res) => {
+  const { description } = req.body;
+  
+  if (!description) {
+    res.status(400).json({ error: 'Description is required' });
+    return;
+  }
+  
+  // Verifică cuvinte interzise
+  if (containsForbiddenWords(description)) {
+    res.status(400).json({ error: 'Task contains inappropriate language' });
+    return;
+  }
+  
   try {
-    const { description } = req.body;
-    
-    if (!description) {
-      res.status(400).json({ error: 'Description is required' });
-      return;
-    }
-    
     const newTodo = await create(description);
     res.status(201).json(newTodo);
-    
   } catch (error) {
     console.error('Error in createTodo:', error);
     res.status(500).json({ error: 'Internal server error' });
